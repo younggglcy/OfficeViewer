@@ -59,9 +59,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc private func openSettings() {
     NSApplication.shared.activate(ignoringOtherApps: true)
-    if let window = NSApplication.shared.windows.first {
-      window.makeKeyAndOrderFront(nil)
-    }
+    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
   }
 
   @objc private func toggleSettings() {
