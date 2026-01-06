@@ -1,74 +1,114 @@
 import AppKit
 import SwiftUI
+import os.log
+
+private let logger = Logger(subsystem: "com.officeviewer", category: "main")
 
 @main
 struct OfficeViewerApp: App {
-  @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-  var body: some Scene {
-    Settings {
-      SettingsView()
-        .environmentObject(appDelegate.viewModel)
+    var body: some Scene {
+        Settings {
+            SettingsView()
+        }
     }
-  }
 }
 
-// MARK: - App Delegate
 class AppDelegate: NSObject, NSApplicationDelegate {
-  let viewModel = OfficeViewerViewModel()
-  private var statusBarItem: NSStatusItem?
+    private var statusBarItem: NSStatusItem?
+    private var settingsWindow: NSWindow?
 
-  func applicationDidFinishLaunching(_ notification: Notification) {
-    print("✅ Application launched")
-    print("📋 Command line arguments: \(CommandLine.arguments)")
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApplication.shared.setActivationPolicy(.accessory)
+        setupStatusBar()
 
-    // Hide the dock icon
-    NSApplication.shared.setActivationPolicy(.accessory)
+        logger.info("App launched, args: \(CommandLine.arguments)")
 
-    // Setup status bar menu
-    setupStatusBar()
-
-    // Handle file passed from Finder "Open With"
-    if CommandLine.arguments.count > 1 {
-      let filePath = CommandLine.arguments[1]
-      print("📂 Received file: \(filePath)")
-
-      DispatchQueue.main.async {
-        self.viewModel.handleFileOpened(at: filePath)
-      }
-    }
-  }
-
-  private func setupStatusBar() {
-    statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-
-    if let button = statusBarItem?.button {
-      button.image = NSImage(systemSymbolName: "doc.text", accessibilityDescription: "OfficeViewer")
-      button.action = #selector(toggleSettings)
-      button.target = self
+        // Handle file passed via command line arguments
+        if CommandLine.arguments.count > 1 {
+            let filePath = CommandLine.arguments[1]
+            logger.info("Processing file: \(filePath)")
+            handleFile(at: filePath)
+        }
     }
 
-    let menu = NSMenu()
-    menu.addItem(
-      NSMenuItem(title: "Settings", action: #selector(openSettings), keyEquivalent: ","))
-    menu.addItem(NSMenuItem.separator())
-    menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
-
-    statusBarItem?.menu = menu
-  }
-
-  @objc private func openSettings() {
-    NSApplication.shared.activate(ignoringOtherApps: true)
-    if let window = NSApplication.shared.windows.first {
-      window.makeKeyAndOrderFront(nil)
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            handleFile(at: url.path)
+        }
     }
-  }
 
-  @objc private func toggleSettings() {
-    openSettings()
-  }
+    private func setupStatusBar() {
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-  @objc private func quitApp() {
-    NSApplication.shared.terminate(nil)
-  }
+        if let button = statusBarItem?.button {
+            button.image = NSImage(
+                systemSymbolName: "doc.text",
+                accessibilityDescription: "OfficeViewer"
+            )
+        }
+
+        let menu = NSMenu()
+        menu.addItem(
+            NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        )
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(
+            NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+        )
+
+        statusBarItem?.menu = menu
+    }
+
+    private func handleFile(at path: String) {
+        logger.info("handleFile called with: \(path)")
+        do {
+            let folderPath = try FileDecoder.decode(path)
+            logger.info("Decoded to: \(folderPath)")
+
+            guard let command = ConfigStore.shared.defaultCommand else {
+                logger.error("No default command configured")
+                showAlert(title: "No Command Configured", message: "Please configure a command in Settings.")
+                return
+            }
+
+            logger.info("Running command: \(command.command)")
+            try CommandRunner.run(command.command, folder: folderPath)
+            logger.info("Command executed successfully")
+        } catch {
+            logger.error("Error: \(error.localizedDescription)")
+            showAlert(title: "Error", message: error.localizedDescription)
+        }
+    }
+
+    private func showAlert(title: String, message: String) {
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = title
+            alert.informativeText = message
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
+    }
+
+    @objc private func openSettings() {
+        if settingsWindow == nil {
+            let hostingController = NSHostingController(rootView: SettingsView())
+            let window = NSWindow(contentViewController: hostingController)
+            window.title = "OfficeViewer Settings"
+            window.styleMask = [.titled, .closable]
+            window.setContentSize(NSSize(width: 500, height: 400))
+            window.center()
+            settingsWindow = window
+        }
+
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    @objc private func quitApp() {
+        NSApplication.shared.terminate(nil)
+    }
 }
