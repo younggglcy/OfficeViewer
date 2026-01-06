@@ -69,5 +69,8 @@
     
     <key>NSSupportsAutomaticGraphicsSwitching</key>
     <true/>
+
+    <key>LSUIElement</key>
+    <true/>
 </dict>
 </plist>
