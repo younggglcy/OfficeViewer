@@ -2,7 +2,7 @@
 
 A macOS Finder "Open With" utility that unpacks Office files (.docx/.xlsx/.pptx) and opens the extracted folder in your editor; includes a menu bar for settings.
 
-<video src="docs/show.mov" width="720" autoplay loop muted playsinline></video>
+![OfficeViewer demo](docs/show.gif)
 
 ## What it does
 
