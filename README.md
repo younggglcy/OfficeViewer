@@ -14,6 +14,8 @@ Office files (.docx, .xlsx, .pptx) are actually ZIP archives containing XML file
 2. Open the DMG and drag OfficeViewer to Applications folder
 3. Launch OfficeViewer from Applications
 
+> **Note**: Since the app is not notarized by Apple, macOS Gatekeeper may block it on first launch. See [Bypassing Gatekeeper](#bypassing-gatekeeper) below.
+
 ### Build from Source
 
 ```bash
@@ -80,6 +82,27 @@ document_docx_20240106_123456/
     ├── styles.xml
     ├── settings.xml
     └── ...
+```
+
+## Bypassing Gatekeeper
+
+Since the app is not signed with an Apple Developer certificate, macOS will show a warning on first launch. Use one of these methods to open it:
+
+**Method 1: Right-click to Open**
+1. Right-click (or Control-click) on OfficeViewer in Applications
+2. Select **Open** from the context menu
+3. Click **Open** in the dialog that appears
+
+**Method 2: System Settings**
+1. Try to open OfficeViewer (it will be blocked)
+2. Open **System Settings** → **Privacy & Security**
+3. Scroll down to find the message about OfficeViewer being blocked
+4. Click **Open Anyway**
+5. Enter your password if prompted
+
+**Method 3: Terminal**
+```bash
+xattr -cr /Applications/OfficeViewer.app
 ```
 
 ## Requirements
