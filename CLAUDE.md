@@ -46,9 +46,26 @@ macOS menu bar app (SwiftUI + AppKit hybrid) that extracts Office files and open
 
 ### Configuration Files
 
-- `info.plist` - Document type associations (docx/xlsx/pptx), `LSUIElement=true` for menu bar only, version number (`CFBundleShortVersionString`)
+- `info.plist` - Document type associations (docx/xlsx/pptx), `LSUIElement=true` for menu bar only
 - `OfficeViewer.entitlements` - App sandbox disabled for file system access
 - `project.pbxproj` - `GENERATE_INFOPLIST_FILE=NO` to use custom Info.plist
+
+### Version Management
+
+Version is managed via Xcode Build Settings (best practice):
+
+| Build Setting | Info.plist Key | Purpose |
+|---------------|----------------|---------|
+| `MARKETING_VERSION` | `CFBundleShortVersionString` | User-facing version (e.g., `0.1.1`) |
+| `CURRENT_PROJECT_VERSION` | `CFBundleVersion` | Build number (e.g., `1`) |
+
+Info.plist uses `$(MARKETING_VERSION)` and `$(CURRENT_PROJECT_VERSION)` placeholders.
+
+To update version via CLI:
+```bash
+# Update MARKETING_VERSION in project.pbxproj
+sed -i '' 's/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = 1.0.0;/g' OfficeViewer.xcodeproj/project.pbxproj
+```
 
 ## Release Workflow
 
@@ -59,7 +76,7 @@ When releasing a new version, **always ask the user** which type of version bump
 
 Steps:
 1. Ask user: major / minor / patch
-2. Update `CFBundleShortVersionString` in `OfficeViewer/info.plist`
+2. Update `MARKETING_VERSION` in `OfficeViewer.xcodeproj/project.pbxproj`
 3. Commit: `chore: bump version to x.y.z`
 4. Create tag: `git tag vX.Y.Z`
 5. Push: `git push origin main && git push origin vX.Y.Z`
