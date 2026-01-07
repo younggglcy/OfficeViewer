@@ -73,6 +73,30 @@ enum FileDecoder {
             throw FileDecoderError.decodingFailed(errorMessage)
         }
 
+        // Format all XML files for better readability
+        formatXMLFiles(in: outputDir)
+
         return outputDir.path
+    }
+
+    private static func formatXMLFiles(in directory: URL) {
+        let fileManager = FileManager.default
+        guard let enumerator = fileManager.enumerator(at: directory, includingPropertiesForKeys: nil) else {
+            return
+        }
+
+        for case let fileURL as URL in enumerator {
+            guard fileURL.pathExtension.lowercased() == "xml" else { continue }
+
+            // Use xmllint to format the XML file
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/xmllint")
+            process.arguments = ["--format", "--output", fileURL.path, fileURL.path]
+            process.standardOutput = FileHandle.nullDevice
+            process.standardError = FileHandle.nullDevice
+
+            try? process.run()
+            process.waitUntilExit()
+        }
     }
 }
