@@ -40,7 +40,7 @@ struct SettingsView: View {
 
                 Spacer()
 
-                Text("v1.0.0")
+                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0")")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

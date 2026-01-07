@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Update version in Info.plist
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" OfficeViewer/info.plist
+
+      - name: Build
+        run: xcodebuild -scheme OfficeViewer -configuration Release build
+
+      - name: Create DMG
+        run: |
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "OfficeViewer.app" -type d | head -1)
+          mkdir -p dmg_contents
+          cp -R "$APP_PATH" dmg_contents/
+          ln -s /Applications dmg_contents/Applications
+          hdiutil create -volname "OfficeViewer" -srcfolder dmg_contents -ov -format UDZO "OfficeViewer-${VERSION}.dmg"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: OfficeViewer-*.dmg
+          generate_release_notes: true

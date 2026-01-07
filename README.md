@@ -8,17 +8,19 @@ Office files (.docx, .xlsx, .pptx) are actually ZIP archives containing XML file
 
 ## Installation
 
+### Download (Recommended)
+
+1. Download the latest `OfficeViewer-x.x.x.dmg` from [Releases](https://github.com/younggglcy/OfficeViewer/releases)
+2. Open the DMG and drag OfficeViewer to Applications folder
+3. Launch OfficeViewer from Applications
+
+### Build from Source
+
 ```bash
-# Clone and build
 git clone https://github.com/younggglcy/OfficeViewer.git
 cd OfficeViewer
 xcodebuild -scheme OfficeViewer -configuration Release build
-
-# Install
 cp -r ~/Library/Developer/Xcode/DerivedData/OfficeViewer-*/Build/Products/Release/OfficeViewer.app /Applications/
-
-# Register with Launch Services
-/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister -f /Applications/OfficeViewer.app
 ```
 
 ## Usage
