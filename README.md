@@ -1,6 +1,8 @@
 # OfficeViewer
 
-A macOS menu bar app for developers to quickly inspect Office file internals.
+A macOS Finder "Open With" utility that unpacks Office files (.docx/.xlsx/.pptx) and opens the extracted folder in your editor; includes a menu bar for settings.
+
+<video src="docs/show.mov" width="720" autoplay loop muted playsinline></video>
 
 ## What it does
 
