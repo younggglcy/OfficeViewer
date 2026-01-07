@@ -46,6 +46,22 @@ macOS menu bar app (SwiftUI + AppKit hybrid) that extracts Office files and open
 
 ### Configuration Files
 
-- `info.plist` - Document type associations (docx/xlsx/pptx), `LSUIElement=true` for menu bar only
+- `info.plist` - Document type associations (docx/xlsx/pptx), `LSUIElement=true` for menu bar only, version number (`CFBundleShortVersionString`)
 - `OfficeViewer.entitlements` - App sandbox disabled for file system access
 - `project.pbxproj` - `GENERATE_INFOPLIST_FILE=NO` to use custom Info.plist
+
+## Release Workflow
+
+When releasing a new version, **always ask the user** which type of version bump:
+- **major** (X.0.0) - Breaking changes
+- **minor** (x.Y.0) - New features
+- **patch** (x.y.Z) - Bug fixes
+
+Steps:
+1. Ask user: major / minor / patch
+2. Update `CFBundleShortVersionString` in `OfficeViewer/info.plist`
+3. Commit: `chore: bump version to x.y.z`
+4. Create tag: `git tag vX.Y.Z`
+5. Push: `git push origin main && git push origin vX.Y.Z`
+
+GitHub Actions will automatically build DMG and create Release.
