@@ -77,7 +77,7 @@
     <key>SUFeedURL</key>
     <string>https://raw.githubusercontent.com/younggglcy/OfficeViewer/main/appcast.xml</string>
     <key>SUPublicEDKey</key>
-    <string>YOUR_EDDSA_PUBLIC_KEY_HERE</string>
+    <string>9+IgXm3niq0mshwu0lDfZRNoXKNmQoJxl7WxTMBdBUM=</string>
     <key>SUEnableAutomaticChecks</key>
     <true/>
 </dict>
