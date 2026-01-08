@@ -1,5 +1,55 @@
 # OfficeViewer 签名和更新机制改进计划
 
+> **状态**: 代码实施已完成，需要手动完成以下步骤。
+
+---
+
+## 需要手动完成的步骤
+
+### 1. 生成 Sparkle EdDSA 密钥对
+
+```bash
+# 下载 Sparkle
+curl -L -o sparkle.tar.xz "https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz"
+mkdir -p sparkle && tar -xf sparkle.tar.xz -C sparkle
+
+# 生成密钥对
+./sparkle/bin/generate_keys
+```
+
+这会输出：
+- **私钥**: 保存输出的私钥字符串
+- **公钥**: 类似 `dW5/xxxx...` 的字符串
+
+### 2. 配置 GitHub Secrets
+
+在 GitHub 仓库设置中添加 Secret：
+- **名称**: `SPARKLE_PRIVATE_KEY`
+- **值**: 上一步生成的私钥
+
+### 3. 更新 Info.plist 中的公钥
+
+编辑 `OfficeViewer/info.plist`，将 `YOUR_EDDSA_PUBLIC_KEY_HERE` 替换为实际的公钥：
+
+```xml
+<key>SUPublicEDKey</key>
+<string>你的公钥字符串</string>
+```
+
+### 4. 创建 Homebrew Tap 仓库
+
+1. 在 GitHub 创建仓库: `younggglcy/homebrew-tap`
+2. 创建目录结构:
+   ```
+   homebrew-tap/
+   └── Casks/
+       └── officeviewer.rb
+   ```
+3. 复制 `homebrew/officeviewer.rb` 到 `Casks/officeviewer.rb`
+4. 发布新版本后，更新 formula 中的 `version` 和 `sha256`
+
+---
+
 ## 确认的方案
 
 | 项目 | 决定 |
