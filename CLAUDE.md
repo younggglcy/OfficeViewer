@@ -74,11 +74,14 @@ When releasing a new version, **always ask the user** which type of version bump
 - **minor** (x.Y.0) - New features
 - **patch** (x.y.Z) - Bug fixes
 
+**Important**: Tagged commits must ONLY contain version bump changes. Never include fixes or features in a tagged commit. If there are pending changes, commit them separately first, then create a version bump commit with tag.
+
 Steps:
 1. Ask user: major / minor / patch
-2. Update `MARKETING_VERSION` in `OfficeViewer.xcodeproj/project.pbxproj`
-3. Commit: `chore: bump version to x.y.z`
-4. Create tag: `git tag vX.Y.Z`
-5. Push: `git push origin main && git push origin vX.Y.Z`
+2. Commit any pending fix/feature changes first (without tag)
+3. Update `MARKETING_VERSION` in `OfficeViewer.xcodeproj/project.pbxproj`
+4. Commit: `chore: bump version to x.y.z`
+5. Create tag: `git tag vX.Y.Z`
+6. Push: `git push origin main && git push origin vX.Y.Z`
 
 GitHub Actions will automatically build DMG and create Release.
