@@ -72,5 +72,13 @@
 
     <key>LSUIElement</key>
     <true/>
+
+    <!-- Sparkle Auto-Update Configuration -->
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/younggglcy/OfficeViewer/main/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>9+IgXm3niq0mshwu0lDfZRNoXKNmQoJxl7WxTMBdBUM=</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
 </dict>
 </plist>

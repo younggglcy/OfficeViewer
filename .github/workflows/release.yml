@@ -23,6 +23,13 @@ jobs:
       - name: Build
         run: xcodebuild -scheme OfficeViewer -configuration Release build
 
+      - name: Ad-hoc code signing
+        run: |
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "OfficeViewer.app" -type d | head -1)
+          codesign --force --deep --sign "-" "$APP_PATH"
+          echo "Ad-hoc signed: $APP_PATH"
+          codesign -dv --verbose=2 "$APP_PATH"
+
       - name: Create DMG
         run: |
           APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "OfficeViewer.app" -type d | head -1)
@@ -31,8 +38,128 @@ jobs:
           ln -s /Applications dmg_contents/Applications
           hdiutil create -volname "OfficeViewer" -srcfolder dmg_contents -ov -format UDZO "OfficeViewer-${VERSION}.dmg"
 
+      - name: Calculate DMG checksum
+        run: |
+          DMG_SHA256=$(shasum -a 256 "OfficeViewer-${VERSION}.dmg" | cut -d ' ' -f 1)
+          echo "DMG_SHA256=$DMG_SHA256" >> $GITHUB_ENV
+          DMG_SIZE=$(stat -f%z "OfficeViewer-${VERSION}.dmg")
+          echo "DMG_SIZE=$DMG_SIZE" >> $GITHUB_ENV
+
+      - name: Download Sparkle for signing
+        run: |
+          curl -L -o sparkle.tar.xz "https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz"
+          mkdir -p sparkle
+          tar -xf sparkle.tar.xz -C sparkle
+
+      - name: Sign update with Sparkle
+        if: ${{ env.SPARKLE_PRIVATE_KEY != '' }}
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          echo "$SPARKLE_PRIVATE_KEY" > /tmp/sparkle_private_key
+          SIGNATURE=$(./sparkle/bin/sign_update "OfficeViewer-${VERSION}.dmg" --ed-key-file /tmp/sparkle_private_key | grep "sparkle:edSignature" | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+          rm /tmp/sparkle_private_key
+          echo "ED_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+
+      - name: Generate appcast.xml
+        run: |
+          PUB_DATE=$(date -R)
+          cat > appcast.xml << EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <channel>
+              <title>OfficeViewer Updates</title>
+              <link>https://github.com/younggglcy/OfficeViewer</link>
+              <description>Most recent updates to OfficeViewer</description>
+              <language>en</language>
+              <item>
+                <title>Version ${VERSION}</title>
+                <pubDate>${PUB_DATE}</pubDate>
+                <sparkle:version>${VERSION}</sparkle:version>
+                <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+                <enclosure url="https://github.com/younggglcy/OfficeViewer/releases/download/v${VERSION}/OfficeViewer-${VERSION}.dmg"
+                           sparkle:edSignature="${ED_SIGNATURE:-}"
+                           length="${DMG_SIZE}"
+                           type="application/octet-stream"/>
+              </item>
+            </channel>
+          </rss>
+          EOF
+
+      - name: Commit appcast.xml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          cp appcast.xml appcast.xml.new
+          git stash
+          git pull origin main
+          mv appcast.xml.new appcast.xml
+          git add appcast.xml
+          git commit -m "chore: update appcast.xml for v${VERSION}" || echo "No changes to commit"
+          git push origin main
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: OfficeViewer-*.dmg
+          files: |
+            OfficeViewer-*.dmg
+            appcast.xml
           generate_release_notes: true
+          body: |
+            ## Installation
+
+            ### Download DMG
+            Download `OfficeViewer-${{ env.VERSION }}.dmg` and drag to Applications.
+
+            ### Homebrew
+            ```bash
+            brew tap younggglcy/tap
+            brew install --cask officeviewer
+            ```
+
+            **Note**: Since the app is not notarized, see [Bypassing Gatekeeper](https://github.com/younggglcy/OfficeViewer#bypassing-gatekeeper) for first launch.
+
+            ---
+            **DMG SHA256**: `${{ env.DMG_SHA256 }}`
+
+      - name: Update Homebrew Tap
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          # Clone the tap repository
+          git clone https://x-access-token:${GH_TOKEN}@github.com/younggglcy/homebrew-tap.git
+          cd homebrew-tap
+
+          # Update the cask formula
+          cat > Casks/officeviewer.rb << 'CASK_EOF'
+          cask "officeviewer" do
+            version "${{ env.VERSION }}"
+            sha256 "${{ env.DMG_SHA256 }}"
+
+            url "https://github.com/younggglcy/OfficeViewer/releases/download/v#{version}/OfficeViewer-#{version}.dmg"
+            name "OfficeViewer"
+            desc "Open Office files and view their XML structure"
+            homepage "https://github.com/younggglcy/OfficeViewer"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            app "OfficeViewer.app"
+
+            zap trash: [
+              "~/Library/Caches/OfficeViewer",
+              "~/Library/Preferences/name.younggglcy.OfficeViewer.plist",
+            ]
+          end
+          CASK_EOF
+
+          # Commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/officeviewer.rb
+          git commit -m "Update officeviewer to ${{ env.VERSION }}" || echo "No changes"
+          git push

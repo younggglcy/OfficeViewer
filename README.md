@@ -10,7 +10,14 @@ Office files (.docx, .xlsx, .pptx) are actually ZIP archives containing XML file
 
 ## Installation
 
-### Download (Recommended)
+### Homebrew (Recommended)
+
+```bash
+brew tap younggglcy/tap
+brew install --cask officeviewer
+```
+
+### Download DMG
 
 1. Download the latest `OfficeViewer-x.x.x.dmg` from [Releases](https://github.com/younggglcy/OfficeViewer/releases)
 2. Open the DMG and drag OfficeViewer to Applications folder
@@ -86,26 +93,36 @@ document_docx_20240106_123456/
     └── ...
 ```
 
+## Auto Updates
+
+OfficeViewer includes automatic update checking via [Sparkle](https://sparkle-project.org/). The app will check for updates on launch and notify you when a new version is available.
+
+You can also manually check for updates via the menu bar: **OfficeViewer icon** → **Check for Updates...**
+
 ## Bypassing Gatekeeper
 
 Since the app is not signed with an Apple Developer certificate, macOS will show a warning on first launch. Use one of these methods to open it:
 
-**Method 1: Right-click to Open**
-1. Right-click (or Control-click) on OfficeViewer in Applications
-2. Select **Open** from the context menu
-3. Click **Open** in the dialog that appears
-
-**Method 2: System Settings**
+**Method 1: System Settings (macOS Sequoia 15+)**
 1. Try to open OfficeViewer (it will be blocked)
 2. Open **System Settings** → **Privacy & Security**
 3. Scroll down to find the message about OfficeViewer being blocked
 4. Click **Open Anyway**
 5. Enter your password if prompted
 
+> **Note**: On macOS Sequoia (15.0+), the right-click "Open" bypass no longer works. You must use System Settings.
+
+**Method 2: Right-click to Open (macOS 14 and earlier)**
+1. Right-click (or Control-click) on OfficeViewer in Applications
+2. Select **Open** from the context menu
+3. Click **Open** in the dialog that appears
+
 **Method 3: Terminal**
 ```bash
 xattr -cr /Applications/OfficeViewer.app
 ```
+
+This removes the quarantine attribute and allows the app to run without Gatekeeper warnings.
 
 ## Requirements
 

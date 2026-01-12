@@ -65,6 +65,7 @@
 			);
 			name = OfficeViewer;
 			packageProductDependencies = (
+				B69B6DFA2EA1780500C45A40 /* Sparkle */,
 			);
 			productName = OfficeViewer;
 			productReference = B69B6DE62EA1780200C45A40 /* OfficeViewer.app */;
@@ -96,6 +97,9 @@
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B69B6DE72EA1780200C45A40 /* Products */;
+			packageReferences = (
+				B69B6DF92EA1780500C45A40 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -327,6 +331,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B69B6DF92EA1780500C45A40 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B69B6DFA2EA1780500C45A40 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B69B6DF92EA1780500C45A40 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B69B6DDE2EA1780200C45A40 /* Project object */;
 }
