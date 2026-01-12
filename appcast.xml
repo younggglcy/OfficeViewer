@@ -6,13 +6,13 @@
     <description>Most recent updates to OfficeViewer</description>
     <language>en</language>
     <item>
-      <title>Version 0.2.1</title>
-      <pubDate>Mon, 12 Jan 2026 11:18:47 +0000</pubDate>
-      <sparkle:version>0.2.1</sparkle:version>
-      <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
-      <enclosure url="https://github.com/younggglcy/OfficeViewer/releases/download/v0.2.1/OfficeViewer-0.2.1.dmg"
-                 sparkle:edSignature="yClSPnRiqElBvJODskTUpPmBzmPBsYIP+myfZq5zHZoV1+5Ynvj9jaAz5aIUQIPBxuWpxCHtkEAzZVd9pfduAg=="
-                 length="1659830"
+      <title>Version 0.2.2</title>
+      <pubDate>Mon, 12 Jan 2026 11:24:13 +0000</pubDate>
+      <sparkle:version>0.2.2</sparkle:version>
+      <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
+      <enclosure url="https://github.com/younggglcy/OfficeViewer/releases/download/v0.2.2/OfficeViewer-0.2.2.dmg"
+                 sparkle:edSignature="iH40Rh2bDTXQDz9b+uW5ms873C7GD1VhsTCoTbj1FgDOY5rW1OHh9gu3EYU4J6CYv7kdan2Sn3+ZK+TXjq/XDQ=="
+                 length="1659341"
                  type="application/octet-stream"/>
     </item>
   </channel>
