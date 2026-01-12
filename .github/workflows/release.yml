@@ -19,6 +19,7 @@ jobs:
       - name: Update version in Info.plist
         run: |
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" OfficeViewer/info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" OfficeViewer/info.plist
 
       - name: Build
         run: xcodebuild -scheme OfficeViewer -configuration Release build
