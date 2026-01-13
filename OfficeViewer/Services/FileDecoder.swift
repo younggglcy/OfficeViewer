@@ -76,6 +76,9 @@ enum FileDecoder {
     // Format all XML files for better readability
     formatXMLFiles(in: outputDir)
 
+    // Record to recent files
+    ConfigStore.shared.addRecentFile(sourceFilePath: filePath, decodedFolderPath: outputDir.path)
+
     return outputDir.path
   }
 
