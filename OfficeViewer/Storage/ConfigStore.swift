@@ -6,6 +6,8 @@ class ConfigStore: ObservableObject {
 
   private let commandsKey = "openCommands"
   private let defaultCommandIdKey = "defaultCommandId"
+  private let recentFilesKey = "recentFiles"
+  private let maxRecentFiles = 20
 
   @Published var commands: [OpenCommand] {
     didSet { saveCommands() }
@@ -13,6 +15,10 @@ class ConfigStore: ObservableObject {
 
   @Published var defaultCommandId: UUID? {
     didSet { saveDefaultCommandId() }
+  }
+
+  @Published var recentFiles: [RecentFile] {
+    didSet { saveRecentFiles() }
   }
 
   var defaultCommand: OpenCommand? {
@@ -25,8 +31,10 @@ class ConfigStore: ObservableObject {
   private init() {
     self.commands = []
     self.defaultCommandId = nil
+    self.recentFiles = []
     loadCommands()
     loadDefaultCommandId()
+    loadRecentFiles()
   }
 
   private func loadCommands() {
@@ -76,5 +84,50 @@ class ConfigStore: ObservableObject {
     if let index = commands.firstIndex(where: { $0.id == command.id }) {
       commands[index] = command
     }
+  }
+
+  // MARK: - Recent Files
+
+  private func loadRecentFiles() {
+    guard let data = UserDefaults.standard.data(forKey: recentFilesKey),
+      let decoded = try? JSONDecoder().decode([RecentFile].self, from: data)
+    else {
+      recentFiles = []
+      return
+    }
+    recentFiles = decoded
+  }
+
+  private func saveRecentFiles() {
+    guard let data = try? JSONEncoder().encode(recentFiles) else { return }
+    UserDefaults.standard.set(data, forKey: recentFilesKey)
+  }
+
+  func addRecentFile(sourceFilePath: String, decodedFolderPath: String) {
+    let fileName = (sourceFilePath as NSString).lastPathComponent
+    let recentFile = RecentFile(
+      sourceFilePath: sourceFilePath,
+      decodedFolderPath: decodedFolderPath,
+      fileName: fileName
+    )
+
+    // Remove existing entry with same source path
+    recentFiles.removeAll { $0.sourceFilePath == sourceFilePath }
+
+    // Add to beginning
+    recentFiles.insert(recentFile, at: 0)
+
+    // Limit to max count
+    if recentFiles.count > maxRecentFiles {
+      recentFiles = Array(recentFiles.prefix(maxRecentFiles))
+    }
+  }
+
+  func removeRecentFile(_ file: RecentFile) {
+    recentFiles.removeAll { $0.id == file.id }
+  }
+
+  func clearRecentFiles() {
+    recentFiles = []
   }
 }
