@@ -110,8 +110,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       let hostingController = NSHostingController(rootView: SettingsView())
       let window = NSWindow(contentViewController: hostingController)
       window.title = "OfficeViewer Settings"
-      window.styleMask = [.titled, .closable]
-      window.setContentSize(NSSize(width: 500, height: 400))
+      window.styleMask = [.titled, .closable, .resizable]
+      window.setContentSize(NSSize(width: 600, height: 500))
+      window.minSize = NSSize(width: 600, height: 500)
       window.center()
       settingsWindow = window
     }
